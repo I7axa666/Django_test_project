@@ -16,7 +16,7 @@
 
 3.1. [Знакомство с API на примере Django REST framework](./3.1-drf-intro),
 
-3.2. [CRUD в DRF](./3.2-crud),
+3.2. [CRUD в DRF](2.1-databases/work_with_database/static/3.2-crud),
 
 3.3. [Разделение доступа в DRF](./3.3-permissions),
 

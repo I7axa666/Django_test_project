@@ -23,7 +23,7 @@
 
 ## Ожидаемый результат
 
-![Каталог с телефонами](res/catalog.png)
+![Каталог с телефонами](static/3.2-crud/stocks_products/res/catalog.png)
 
 ## Подсказка
 
