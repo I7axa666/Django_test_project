@@ -9,11 +9,18 @@
         </div>
         <div class="row">
             <div class="book col-md-4">
-                {% for b in books %}
+                {% for b in page %}
                 <h2>{{ b.name }}</h2>
                 <p>Автор: {{ b.author }}</p>
                 <p>Дата публикации: {{ b.pub_date|date:"Y-m-d" }}</p>
                 {% endfor %}
+
+                {% if page.has_previous %}
+                <a href="/books/{{ prev }}"> < {{ prev }}</a>
+                {% endif %}
+                {% if page.has_next %}
+                <a href="/books/{{ next }}"> {{ next }} > </a>
+                {% endif %}
             </div>
         </div>
     </div>
