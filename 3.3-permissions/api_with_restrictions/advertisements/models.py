@@ -9,6 +9,7 @@ class AdvertisementStatusChoices(models.TextChoices):
     CLOSED = "CLOSED", "Закрыто"
 
 
+
 class Advertisement(models.Model):
     """Объявление."""
 
