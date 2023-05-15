@@ -20,11 +20,20 @@ class AdvertisementViewSet(ModelViewSet):
 
     # TODO: настройте ViewSet, укажите атрибуты для кверисета,
     #   сериализаторов и фильтров
-    queryset = Advertisement.objects.all()
+    queryset = Advertisement.objects.exclude(status='DRAFT')
     serializer_class = AdvertisementSerializer
     filter_backends = [DjangoFilterBackend, ]
     # filterset_fields = ['creator']
     filterset_class = AdvertisementFilter
+
+    def get_queryset(self):
+        if IsAuthenticated():
+            creator_id = self.request.user.id
+            queryset = Advertisement.objects.filter(creator_id=creator_id)
+            return queryset
+        else:
+            queryset = Advertisement.objects.exclude(status='DRAFT')
+            return queryset
 
     def get_permissions(self):
         """Получение прав для действий."""

@@ -7,7 +7,7 @@ class AdvertisementStatusChoices(models.TextChoices):
 
     OPEN = "OPEN", "Открыто"
     CLOSED = "CLOSED", "Закрыто"
-
+    DRAFT = "DRAFT", "Черновик"
 
 
 class Advertisement(models.Model):
@@ -17,7 +17,7 @@ class Advertisement(models.Model):
     description = models.TextField(default='')
     status = models.TextField(
         choices=AdvertisementStatusChoices.choices,
-        default=AdvertisementStatusChoices.OPEN
+        default=AdvertisementStatusChoices.DRAFT
     )
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
