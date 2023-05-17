@@ -1,5 +1,10 @@
+from django.http import JsonResponse
 from django_filters import DateFromToRangeFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from requests import Response
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
@@ -13,7 +18,7 @@ class AdvertisementFilter(FilterSet):
 
     class Meta:
         model = Advertisement
-        fields = ['creator', 'status', 'created_at', ]
+        fields = ['creator', 'status', 'created_at', 'favorite']
 
 class AdvertisementViewSet(ModelViewSet):
     """ViewSet для объявлений."""
@@ -40,3 +45,14 @@ class AdvertisementViewSet(ModelViewSet):
         if self.action in ["create", "update", "partial_update", "destroy"]:
             return [IsAuthenticated(), IsOwner()]
         return []
+
+    @action(methods=['PATCH'], detail=True)
+    def favorite(self, request, pk=None):
+        if self.request.user.id == Advertisement.objects.get(id=pk).creator_id:
+            raise ValidationError('Свои объявления нельзя сохранить в избранном')
+
+        instance = Advertisement.objects.get(id=pk)
+        instance.favorite = request.data['favorite']
+        instance.save()
+        serializers = self.get_serializer(Advertisement.objects.get(id=pk))
+        return Response(serializers.data)
