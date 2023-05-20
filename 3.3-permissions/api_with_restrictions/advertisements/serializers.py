@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from advertisements.models import Advertisement
+from advertisements.models import Advertisement, Favorites
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class AdvertisementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advertisement
         fields = ('id', 'title', 'description', 'creator',
-                  'status', 'created_at', 'favorite')
+                  'status', 'created_at')
 
     def create(self, validated_data):
         """Метод для создания"""
@@ -43,6 +43,12 @@ class AdvertisementSerializer(serializers.ModelSerializer):
 
         # TODO: добавьте требуемую валидацию
         adv_list = Advertisement.objects.filter(creator_id=self.context["request"].user.id, status='OPEN')
-        if len(adv_list) > 10:
+        if adv_list.count() > 10 and data['status'] == 'OPEN':
             raise ValidationError('У пользователя больше десяти открытых объявлений')
         return data
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorites
+        fields = ('id', 'user', 'advertisement',)

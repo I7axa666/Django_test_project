@@ -1,24 +1,22 @@
 from django.http import JsonResponse
 from django_filters import DateFromToRangeFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
-from requests import Response
+from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from advertisements.models import Advertisement
+from advertisements.filters import AdvertisementFilter
+from advertisements.models import Advertisement, Favorites
 from advertisements.permissions import IsOwner
-from advertisements.serializers import AdvertisementSerializer
+from advertisements.serializers import AdvertisementSerializer, FavoriteSerializer
 
 
-class AdvertisementFilter(FilterSet):
-    created_at = DateFromToRangeFilter()
-
-    class Meta:
-        model = Advertisement
-        fields = ['creator', 'status', 'created_at', 'favorite']
+class FavoritesViewSet(ModelViewSet):
+    queryset = Favorites.objects.all()
+    serializer_class = FavoriteSerializer
 
 class AdvertisementViewSet(ModelViewSet):
     """ViewSet для объявлений."""
@@ -28,11 +26,10 @@ class AdvertisementViewSet(ModelViewSet):
     queryset = Advertisement.objects.exclude(status='DRAFT')
     serializer_class = AdvertisementSerializer
     filter_backends = [DjangoFilterBackend, ]
-    # filterset_fields = ['creator']
     filterset_class = AdvertisementFilter
 
     def get_queryset(self):
-        if IsAuthenticated():
+        if self.request.user.is_authenticated:
             creator_id = self.request.user.id
             queryset = Advertisement.objects.filter(creator_id=creator_id)
             return queryset
@@ -46,13 +43,16 @@ class AdvertisementViewSet(ModelViewSet):
             return [IsAuthenticated(), IsOwner()]
         return []
 
-    @action(methods=['PATCH'], detail=True)
+    @action(methods=['POST'], detail=True)
     def favorite(self, request, pk=None):
         if self.request.user.id == Advertisement.objects.get(id=pk).creator_id:
             raise ValidationError('Свои объявления нельзя сохранить в избранном')
 
-        instance = Advertisement.objects.get(id=pk)
-        instance.favorite = request.data['favorite']
-        instance.save()
-        serializers = self.get_serializer(Advertisement.objects.get(id=pk))
-        return Response(serializers.data)
+        fav = Favorites(
+            user_id=self.request.user.id,
+            advertisement_id=pk,
+        )
+        fav.save()
+        return Response(FavoriteSerializer(fav).data)
+
+
