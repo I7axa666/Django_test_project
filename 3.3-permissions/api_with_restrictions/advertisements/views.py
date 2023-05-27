@@ -45,14 +45,19 @@ class AdvertisementViewSet(ModelViewSet):
 
     @action(methods=['POST'], detail=True)
     def favorite(self, request, pk=None):
-        if self.request.user.id == Advertisement.objects.get(id=pk).creator_id:
+        user_id = self.request.user.id
+        if user_id == Advertisement.objects.get(id=pk).creator_id:
             raise ValidationError('Свои объявления нельзя сохранить в избранном')
 
-        fav = Favorites(
-            user_id=self.request.user.id,
+        favorite = Favorites(
+            user_id=user_id,
             advertisement_id=pk,
         )
-        fav.save()
-        return Response(FavoriteSerializer(fav).data)
+        favorite.save()
+        favorites_list = AdvertisementSerializer(
+            Advertisement.objects.filter(favorite__user_id=user_id),
+            many=True
+        )
+        return Response(favorites_list.data)
 
 
