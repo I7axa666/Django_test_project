@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
                   'last_name',)
 
 
-class AdvertisementSerializer(serializers.ModelSerializer):
+    class AdvertisementSerializer(serializers.ModelSerializer):
     """Serializer для объявления."""
 
     creator = UserSerializer(
@@ -43,11 +43,7 @@ class AdvertisementSerializer(serializers.ModelSerializer):
 
         # TODO: добавьте требуемую валидацию
         adv_list = Advertisement.objects.filter(creator_id=self.context["request"].user.id, status='OPEN')
-        try:
-            status = data['status']
-        except:
-            status = None
-        if adv_list.count() > 10 and status == 'OPEN':
+        if adv_list.count() and data.get('status') == 'OPEN':
             raise ValidationError('У пользователя больше десяти открытых объявлений')
         return data
 
