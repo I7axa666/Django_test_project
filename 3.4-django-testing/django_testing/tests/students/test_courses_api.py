@@ -48,12 +48,14 @@ def test_get_list_course(client, course_factory):
 @pytest.mark.django_db
 def test_filter_course(client, course_factory):
     courses = course_factory(_quantity=10)
+    id = courses[3].id
 
-    response = client.get('/api/v1/courses/?search=1')
+    response = client.get('/api/v1/courses/?id=' + str(id))
 
     assert response.status_code == 200
     data = response.json()
-    assert data[0]['name'] == Course.objects.get(id=12).name
+    assert id == data[0]['id']
+    assert data[0]['name'] == Course.objects.get(id=id).name
     course_name = courses[0].name
     response = client.get('/api/v1/courses/?search=' + course_name)
     assert response.status_code == 200
