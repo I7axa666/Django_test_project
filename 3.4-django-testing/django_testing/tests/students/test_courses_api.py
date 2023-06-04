@@ -79,3 +79,13 @@ def test_create_update_delete_course(client):
     assert response.status_code == 204
     count_update = Course.objects.all().count()
     assert count_update == count - 1
+
+
+@pytest.mark.django_db
+def test_students_count(client, settings):
+
+    response = client.get('/api/v1/courses/')
+    assert response.status_code == 200
+    data = response.json()
+    for course in data:
+        assert course['students'].count() <= settings.MAX_STUDENTS_PER_COURSE
