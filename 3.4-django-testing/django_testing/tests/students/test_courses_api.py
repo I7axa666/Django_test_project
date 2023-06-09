@@ -75,7 +75,6 @@ def test_create_course(client):
 
     assert response.status_code == 201
     courses = Course.objects.all()
-    count = Course.objects.all().count()
     assert courses[0].name == 'Python'
 
 @pytest.mark.django_db
@@ -102,9 +101,10 @@ def test_delete_course(client, course_factory):
 
 @pytest.mark.django_db
 def test_students_count(client, settings):
-
     response = client.get('/api/v1/courses/')
+
     assert response.status_code == 200
+
     data = response.json()
     for course in data:
         assert course['students'].count() <= settings.MAX_STUDENTS_PER_COURSE
